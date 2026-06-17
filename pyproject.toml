@@ -1,0 +1,23 @@
+[project]
+name = "ekg-power-curve-app"
+version = "0.1.0"
+description = "Visualisierung und Analyse von EKG- und Leistungsdaten"
+authors = [
+{name = "Projektteam"}
+]
+requires-python = ">=3.11"
+
+dependencies = [
+"streamlit>=1.46.0",
+"pandas>=2.3.0",
+"numpy>=2.3.0",
+"matplotlib>=3.10.0",
+"plotly>=6.0.0",
+"pillow>=11.0.0"
+]
+
+[tool.pdm]
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
