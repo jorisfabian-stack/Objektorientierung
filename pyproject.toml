@@ -1,0 +1,15 @@
+[project]
+name = "09"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "milanbuerkle", email = "m.buerkle@mci4me.at"},
+]
+dependencies = ["streamlit>=1.58.0", "plotly>=6.8.0"]
+requires-python = "==3.12.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
