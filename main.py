@@ -6,9 +6,9 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parent
 sys.path.insert(0, str(project_root / "source"))
 
-import read_data_1
-from pandas_plot import zeige_leistungstest, leistungstest_data
-from Leistungskurve import create_power_curve
+import person
+from leistungstest_plot import zeige_leistungstest, leistungstest_data
+from leistungskurve import create_power_curve
 import pandas as pd
 import plotly.express as px
 
@@ -20,10 +20,10 @@ st.write("# EKG APP")
 st.write("## Versuchsperson auswählen")
 
 # 1. Die echten JSON-Daten laden
-daten = read_data_1.load_person_data()
+daten = person.load_person_data()
 
 # 2. Die Namensliste generieren
-person_names = read_data_1.get_person_list(daten)
+person_names = person.get_person_list(daten)
 
 # 3. Auswahlbox mit den echten Namen befüllen
 current_user = st.selectbox(
@@ -34,14 +34,14 @@ current_user = st.selectbox(
 
 st.write("Der Name ist:", current_user)
 
-current_person_data = read_data_1.find_person_data_by_name(daten, current_user)
+current_person_data = person.find_person_data_by_name(daten, current_user)
 
 # Prüfen, ob die Person existiert und ob ein Bildpfad hinterlegt ist
 col1, col2 = st.columns(2)
 
 with col1:
-    if current_person_data and "picture_path" in current_person_data:
-        bild_pfad = current_person_data["picture_path"]
+    if current_person_data and current_person_data.picture_path:
+        bild_pfad = current_person_data.picture_path
         st.image(bild_pfad, width=300)
     else:
         st.write("Kein Bild für diese Person gefunden.")
