@@ -54,7 +54,7 @@ pdm install
 ### Streamlit-Webanwendung
 
 ```bash
-pdm run streamlit app.py
+pdm run streamlit run main.py
 ```
 
 Anschließend öffnet sich die Anwendung im Browser.
@@ -64,18 +64,17 @@ Anschließend öffnet sich die Anwendung im Browser.
 
 ```text
 .
-├── app.py                  # Streamlit-Hauptanwendung
-├── main.py                 # Desktop-Ausführung
-├── Leistungskurve.py       # Berechnung der Power Curve
-├── Plot.py                 # Plot-Funktionen
+├── main.py                # Streamlit-Hauptanwendung
 ├── data/
 │   ├── activity.csv
 │   ├── person_db.json
+│   ├── ekg_data/
 │   └── pictures/
 ├── source/
-│   ├── read_data_1.py
-│   ├── pandas_plot.py
-│   └── callbacks.py
+│   ├── ekgdata.py
+│   ├── leistungskurve.py
+│   ├── leistungstest_plot.py
+│   └── person.py
 ├── pyproject.toml
 └── pdm.lock
 ```
