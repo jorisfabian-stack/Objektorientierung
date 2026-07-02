@@ -2,12 +2,24 @@ import pandas as pd
 import streamlit as st
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from source.config import ACTIVITY_FILE
+from source.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 def zeige_leistungstest():
-    """Load the activity CSV file and calculate zone thresholds for the performance test."""
+    """Load activity data and calculate zone thresholds for heart rate and power.
+    
+    Displays a performance test header, calculates average and maximum power values,
+    prompts the user for maximum heart rate, and computes training zones.
+    
+    Returns:
+        Tuple of (DataFrame with activity data, zone boundaries for HR, zone boundaries for power).
+    """
     st.header("Auswertung Leistungstest")
-    df = pd.read_csv("data/activity.csv")
+    logger.debug("Loading activity file %s", ACTIVITY_FILE)
+    df = pd.read_csv(ACTIVITY_FILE)
 
     mittelwert_leistung = round(df["PowerOriginal"].mean(), 2)
     maximalwert_leistung = round(df["PowerOriginal"].max(), 2)
@@ -40,7 +52,16 @@ def zeige_leistungstest():
 
   
 def leistungstest_data(df, zone_grenzen, watt_grenzen):
-    """Render an interactive Plotly chart and zone analytics for the performance test."""
+    """Render an interactive dual-axis chart with zone shading and detailed analytics.
+    
+    Creates a Plotly figure with heart rate and power data, applies zone-based background
+    coloring, and displays zone-specific statistics in a summary table.
+    
+    Args:
+        df: DataFrame containing 'HeartRate', 'PowerOriginal', and 'Zone' columns.
+        zone_grenzen: List of heart rate zone boundaries for background shading.
+        watt_grenzen: List of power zone boundaries for background shading.
+    """
     st.subheader("Interaktiver Kurvenverlauf")
 
     hintergrund_auswahl = st.radio(

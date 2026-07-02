@@ -5,6 +5,9 @@ from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+from source.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 DATA_ROOT = Path(__file__).resolve().parent.parent / "data"
 
@@ -26,6 +29,7 @@ class Ekgdata:
         power_original: List[float] = []
         raw_rows: List[Dict[str, Any]] = []
 
+        logger.debug("Loading EKG file %s downsample=%d", path, downsample_factor)
         with path.open("r", encoding="utf-8", errors="ignore") as file:
             reader = csv.reader(file, delimiter="\t")
             for index, raw_row in enumerate(reader):
@@ -52,6 +56,7 @@ class Ekgdata:
 
     @classmethod
     def from_ekg_test(cls, ekg_test: Dict[str, Any], downsample_factor: int = 1) -> Optional["Ekgdata"]:
+        """Create Ekgdata from a test dictionary entry."""
         link = ekg_test.get("result_link")
         if not link:
             return None
@@ -63,29 +68,44 @@ class Ekgdata:
     @classmethod
     @lru_cache(maxsize=32)
     def cached_from_file(cls, path: str, downsample_factor: int = 1) -> "Ekgdata":
+        """Load EKG data from a file with LRU caching for performance."""
         return cls.from_file(Path(path), downsample_factor=downsample_factor)
 
     def average_heart_rate(self) -> float:
+        """Calculate the average heart rate across all samples."""
         return sum(self.heart_rate) / len(self.heart_rate) if self.heart_rate else 0.0
 
     def max_heart_rate(self) -> float:
+        """Return the maximum heart rate in the dataset."""
         return max(self.heart_rate) if self.heart_rate else 0.0
 
     def average_power(self) -> float:
+        """Calculate the average power across all samples."""
         return sum(self.power_original) / len(self.power_original) if self.power_original else 0.0
 
     def max_power(self) -> float:
+        """Return the maximum power in the dataset."""
         return max(self.power_original) if self.power_original else 0.0
 
     def sample_count(self) -> int:
+        """Return the total number of samples in the dataset."""
         return len(self.duration)
 
     def total_duration_minutes(self, sample_rate_hz: float = 1.0) -> float:
+        """Calculate the total duration of the test in minutes.
+        
+        Args:
+            sample_rate_hz: Sampling rate in Hz (default 1.0 Hz).
+            
+        Returns:
+            Duration in minutes, rounded to 2 decimal places.
+        """
         if not self.duration:
             return 0.0
         return round(self.sample_count() / sample_rate_hz / 60.0, 2)
 
     def summary(self) -> Dict[str, Any]:
+        """Generate a summary dictionary with key statistics about the EKG test."""
         return {
             "samples": self.sample_count(),
             "duration_minutes": self.total_duration_minutes(),
