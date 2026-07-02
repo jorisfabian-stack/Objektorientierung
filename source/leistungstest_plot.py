@@ -3,20 +3,17 @@ import streamlit as st
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-def zeige_leistungstest():  # Diese Funktion lädt die Daten, berechnet die Zonen und gibt
-    # 1. Überschrift anzeigen und Daten laden
+
+def zeige_leistungstest():
+    """Load the activity CSV file and calculate zone thresholds for the performance test."""
     st.header("Auswertung Leistungstest")
     df = pd.read_csv("data/activity.csv")
 
-    # 2. Kennzahlen berechnen und ausgeben
     mittelwert_leistung = round(df["PowerOriginal"].mean(), 2)
     maximalwert_leistung = round(df["PowerOriginal"].max(), 2)
     
-    #Auswertungen des Leistungstests werden hier ausgegeben
     st.write(f"Durchschnittliche Leistung: **{mittelwert_leistung} W**")
     st.write(f"Maximale Leistung: **{maximalwert_leistung} W**")
-
-    # 3. Zonen berechnen
     hf_max = st.number_input("Deine maximale Herzfrequenz (HF max):", value=190, max_value=250, min_value=100)
     max_gemessen = df["HeartRate"].max()
     if hf_max < max_gemessen:
@@ -28,7 +25,6 @@ def zeige_leistungstest():  # Diese Funktion lädt die Daten, berechnet die Zone
 
     df["Zone"] = pd.cut(df["HeartRate"], bins=zone_grenzen, labels=zone_namen, include_lowest=True)
 
-    # Typische FTP-Verteilung: Z1 (<55%), Z2 (55-75%), Z3 (75-90%), Z4 (90-105%), Z5 (105-120%), Z6 (120-150%), Z7 (>150%)
     watt_max = df["PowerOriginal"].max()
     watt_grenzen = [
         0, 
@@ -43,7 +39,8 @@ def zeige_leistungstest():  # Diese Funktion lädt die Daten, berechnet die Zone
     return df, zone_grenzen, watt_grenzen
 
   
-def leistungstest_data(df, zone_grenzen, watt_grenzen): # Diese Funktion zeigt die interaktiven Kurven und die Tabellen mit den Zonen-Auswertungen an
+def leistungstest_data(df, zone_grenzen, watt_grenzen):
+    """Render an interactive Plotly chart and zone analytics for the performance test."""
     st.subheader("Interaktiver Kurvenverlauf")
 
     hintergrund_auswahl = st.radio(
@@ -83,13 +80,13 @@ def leistungstest_data(df, zone_grenzen, watt_grenzen): # Diese Funktion zeigt d
         "rgba(200, 0, 0, 0.15)"     # Zone 5: Dunkelrot
     ]
     watt_farben = [
-        "rgba(241, 226, 237, 0.4)",  # Z1: Active Recovery (hellrosa)
-        "rgba(220, 190, 210, 0.4)",  # Z2: Endurance (etwas dunkleres rosa)
+        "rgba(241, 226, 237, 0.4)",  # Z1: Active Recovery
+        "rgba(220, 190, 210, 0.4)",  # Z2: Endurance
         "rgba(203, 161, 191, 0.4)",  # Z3: Tempo
         "rgba(182, 127, 169, 0.4)",  # Z4: Threshold
         "rgba(160, 94, 146, 0.4)",   # Z5: VO2Max
-        "rgba(139, 66, 125, 0.4)",   # Z6: Anaerobic (dunkellila)
-        "rgba(105, 35, 95, 0.4)"     # Z7: Neuromuscular (tiefes, dunkles Lila)     #wobei es Z6 und Z7 nie gibt da sie über der maximalen Leistung liegen würden
+        "rgba(139, 66, 125, 0.4)",   # Z6: Anaerobic
+        "rgba(105, 35, 95, 0.4)"     # Z7: Neuromuscular
         ]
     hintergrund_shapes = []
     
@@ -134,10 +131,8 @@ def leistungstest_data(df, zone_grenzen, watt_grenzen): # Diese Funktion zeigt d
     fig.update_yaxes(range=[0, 450], secondary_y=False)
     fig.update_yaxes(secondary_y=True)
 
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, key="performance_test_chart")
 
-  
-    # 4. Tabellen erstellen und direkt ausgeben
     zeit_pro_zone = df.groupby("Zone").size().rename("verbrachte Zeit in jeweiliger Zone")
     
     leistung_pro_zone = df.groupby("Zone")["PowerOriginal"].mean().round(2).rename("erbrachte Leistung in jeweiliger Zone")
@@ -148,10 +143,5 @@ def leistungstest_data(df, zone_grenzen, watt_grenzen): # Diese Funktion zeigt d
         st.write("**Zeit pro Zone (Sekunden):**")
         st.dataframe(zeit_pro_zone)
     with col2:
-        st.write("**Ø Leistung pro Zone:**")
+        st.write("**Durchschnittliche Leistung pro Zone:**")
         st.dataframe(leistung_pro_zone)
-
-
-if __name__ == "__main__":      # Hiermit wird die Hauptfunktion definiert, die beim Starten der App ausgeführt wird. Alle Funktionen, die nicht in einer Funktion definiert sind, werden ebenfalls ausgeführt.
-    df, zone_grenzen, watt_grenzen = zeige_leistungstest()
-    leistungstest_data(df, zone_grenzen, watt_grenzen)

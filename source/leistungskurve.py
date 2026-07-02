@@ -9,6 +9,17 @@ def create_power_curve(
     time_column: str = "Duration",
     time: Optional[Union[pd.Series, np.ndarray, Sequence[float]]] = None,
 ) -> pd.DataFrame:
+    """Calculate a power curve by finding the maximum average power for each time window.
+    
+    Args:
+        data: DataFrame, Series, array, or sequence of power values.
+        power_column: Column name for power data (used if data is a DataFrame).
+        time_column: Column name for time data (used if data is a DataFrame).
+        time: Optional time array to pair with power data.
+        
+    Returns:
+        DataFrame with duration_s and power_w columns representing the power curve.
+    """
 
     if isinstance(data, pd.DataFrame):
         subset = data[[power_column, time_column]].dropna(subset=[power_column, time_column])
@@ -21,10 +32,10 @@ def create_power_curve(
         else:
             time_values = np.asarray(time, dtype=float)
             if time_values.shape != power.shape:
-                raise ValueError("Laenge von Leistung und Zeit muss ueberinstimmen.")
+                raise ValueError("Length of power and time must match.")
 
     if power.size == 0:
-        raise ValueError("Keine gueltigen Daten fuer die Power Curve gefunden.")
+        raise ValueError("No valid data found for power curve calculation.")
 
     if time_values is None:
         sample_durations = np.ones_like(power, dtype=float)
